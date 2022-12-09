@@ -17,7 +17,7 @@ class BodyParser
                 $input = json_decode(App::$request->getBody()->getContents(), TRUE);
                 App::$request = App::$request->withParsedBody($input);
             }
-        } else {
+        } else if (App::$request->getMethod() !== "POST") {
             try {
                 $parser = Parser::createFromRequest(App::$request, App::$uploaded, App::$stream);
                 App::$request = $parser->decorateRequest(App::$request);
