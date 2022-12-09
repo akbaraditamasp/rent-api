@@ -12,8 +12,11 @@ class Building extends BaseModel
      * @var array<int, string>
      */
     protected $fillable = [
-        "name", "address", "facilities", "pic"
+        "name", "address", "facilities", "pic", "price"
     ];
 
-    
+    protected $casts = [
+        "facilities" => "array",
+        "price" => "int"
+    ];
 }

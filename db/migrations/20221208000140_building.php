@@ -21,6 +21,7 @@ final class Building extends AbstractMigration
     {
         ($this->table("buildings"))->addColumn("name", "string")
             ->addColumn("address", "string")
+            ->addColumn("price", "integer")
             ->addColumn("facilities", "json")
             ->addColumn("pic", "string")
             ->addTimestamps()

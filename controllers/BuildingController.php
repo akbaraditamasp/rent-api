@@ -20,13 +20,13 @@ class BuildingController
                 "name" => v::stringType()->notEmpty(),
                 "address" => v::stringType()->notEmpty(),
                 "facilities" => v::arrayType()->each(v::stringType()->notEmpty()),
+                "price" => v::numericVal()->notEmpty()
             ],
             "file" => [
                 "pic" => v::optional(v::objectType()->attribute("file", v::image()))
             ]
         ]);
         App::controller(function () {
-
             $building = new Building();
             (Eloquent::getCapsule())->connection()->transaction(function () use ($building) {
                 $body = App::$request->getParsedBody();
@@ -36,6 +36,7 @@ class BuildingController
                 $building->name = $body["name"];
                 $building->address = $body["address"];
                 $building->facilities = $body["facilities"];
+                $building->price = $body["price"];
 
                 if ($file) {
                     $filename = sprintf(
@@ -50,6 +51,26 @@ class BuildingController
 
                 if ($file) {
                     $file->moveTo(__DIR__ . "/../uploaded/" . $filename);
+                }
+            });
+
+            return $building->toArray();
+        });
+    }
+    
+    public function delete($id) {
+        Auth::validate();
+        App::controller(function() use ($id) {
+            /**
+             * @var Building $building
+             */
+            $building = Building::findOrFail($id);
+
+            (Eloquent::getCapsule())->getConnection()->transaction(function() use ($building) {
+                $building->delete();
+
+                if(file_exists(__DIR__."/../uploaded/".$building->pic)) {
+                    unlink(__DIR__."/../uploaded/".$building->pic);
                 }
             });
 
