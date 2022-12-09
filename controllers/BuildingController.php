@@ -77,4 +77,19 @@ class BuildingController
             return $building->toArray();
         });
     }
+
+    public function index() {
+        App::controller(function() {
+            $limit = App::$request->getQueryParams()["limit"] ?? 5;
+            $page = App::$request->getQueryParams()["page"] ?? 1;
+            $offset = (((int) $page) - 1) * ((int) $limit);
+
+            $buildings = Building::orderByDesc("created_at");
+
+            return [
+                "pageTotal" => ceil($buildings->count() / ((int) $limit)),
+                "rows" => $buildings->get()
+            ];
+        });
+    }
 }

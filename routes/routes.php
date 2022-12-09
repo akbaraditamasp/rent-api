@@ -8,6 +8,7 @@ $router->mount("/api", function () use ($router) {
     });
     $router->mount("/building", function () use ($router) {
         $router->delete("/(\d+)", "BuildingController@delete");
+        $router->get("/", "BuildingController@index");
         $router->post("/", "BuildingController@add");
     });
 });
