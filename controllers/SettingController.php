@@ -5,6 +5,7 @@ namespace Controller;
 use Model\Setting;
 use Respect\Validation\Validator as v;
 use Siluet\App;
+use Siluet\Auth;
 use Siluet\Eloquent;
 use Siluet\Validation;
 
@@ -21,6 +22,7 @@ class SettingController
 
     public function save()
     {
+        Auth::validate();
         $body = Validation::validate([
             "body" => [
                 "settings" => v::arrayType()

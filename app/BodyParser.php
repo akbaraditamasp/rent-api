@@ -2,6 +2,7 @@
 
 namespace Siluet;
 
+use Exception;
 use Kekos\MultipartFormDataParser\Parser;
 use Respect\Validation\Validator;
 
@@ -16,14 +17,12 @@ class BodyParser
                 $input = json_decode(App::$request->getBody()->getContents(), TRUE);
                 App::$request = App::$request->withParsedBody($input);
             }
-        } else if (
-            !in_array(
-                App::$request->getMethod(),
-                ["POST", "GET"]
-            )
-        ) {
-            $parser = Parser::createFromRequest(App::$request, App::$uploaded, App::$stream);
-            App::$request = $parser->decorateRequest(App::$request);
+        } else {
+            try {
+                $parser = Parser::createFromRequest(App::$request, App::$uploaded, App::$stream);
+                App::$request = $parser->decorateRequest(App::$request);
+            } catch (Exception $e) {
+            }
         }
     }
 }
