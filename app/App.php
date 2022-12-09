@@ -7,11 +7,15 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Laminas\Diactoros\Response;
 use Laminas\Diactoros\ServerRequest;
 use Laminas\Diactoros\ServerRequestFactory;
+use Laminas\Diactoros\StreamFactory;
+use Laminas\Diactoros\UploadedFileFactory;
 
 class App
 {
     public static ServerRequest $request;
     public static Response $response;
+    public static UploadedFileFactory $uploaded;
+    public static StreamFactory $stream;
 
     public static function boot()
     {
@@ -28,6 +32,8 @@ class App
             $_FILES
         );
         static::$response = new Response();
+        static::$uploaded = new UploadedFileFactory();
+        static::$stream = new StreamFactory;
     }
 
     public static function finish()

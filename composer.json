@@ -25,6 +25,8 @@
     "robmorgan/phinx": "^0.13.2",
     "firebase/php-jwt": "^6.3",
     "medz/cors": "^1.5",
-    "endyjasmi/cuid": "2.*"
+    "endyjasmi/cuid": "2.*",
+    "notihnio/php-request-parser": "2.0",
+    "kekos/multipart-form-data-parser": "^1.1"
   }
 }

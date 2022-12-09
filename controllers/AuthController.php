@@ -12,18 +12,18 @@ class AuthController
 {
     public function login()
     {
-        Validation::validate([
+        $query = Validation::validate([
             "query" => [
                 "username" => v::stringType()->notEmpty(),
                 "password" => v::stringType()->notEmpty(),
             ]
         ]);
-        App::controller(function () {
+        App::controller(function () use ($query) {
             /**
              * @var User
              */
-            $user = User::where("username", App::$request->getQueryParams()["username"])->firstOrFail();
-            if (!password_verify(App::$request->getQueryParams()["password"], $user->password)) {
+            $user = User::where("username", $query["username"])->firstOrFail();
+            if (!password_verify($query["password"], $user->password)) {
                 App::$response = App::$response->withStatus(401);
                 return ["error" => "Unauthorized"];
             }

@@ -21,7 +21,7 @@ class SettingController
 
     public function save()
     {
-        Validation::validate([
+        $body = Validation::validate([
             "body" => [
                 "settings" => v::arrayType()
                     ->each(
@@ -33,21 +33,23 @@ class SettingController
                     )
             ]
         ]);
-        App::controller(function () {
+        App::controller(function () use ($body) {
             $settings = [];
             $db = (Eloquent::getCapsule())->getConnection();
 
-            $db->transaction(function () use (&$settings) {
-                foreach (App::$request->getParsedBody()["settings"] as $setting) {
-                    /**
-                     * @var Setting
-                     */
-                    $set = Setting::firstOrNew(["key" => $setting["key"]]);
-                    $set->value = $setting["value"];
-                    $set->save();
-                    $settings[] = $set->toArray();
+            $db->transaction(
+                function () use (&$settings, $body) {
+                    foreach ($body["settings"] as $setting) {
+                        /**
+                         * @var Setting
+                         */
+                        $set = Setting::firstOrNew(["key" => $setting["key"]]);
+                        $set->value = $setting["value"];
+                        $set->save();
+                        $settings[] = $set->toArray();
+                    }
                 }
-            });
+            );
 
             return $settings;
         });
