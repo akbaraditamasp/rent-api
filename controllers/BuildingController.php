@@ -146,4 +146,16 @@ class BuildingController
             ];
         });
     }
+
+    public function getId($id)
+    {
+        App::controller(function () use ($id) {
+            /**
+             * @var Building $building
+             */
+            $building = Building::findOrFail($id);
+
+            return $building->toArray();
+        });
+    }
 }

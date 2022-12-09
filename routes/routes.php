@@ -14,6 +14,7 @@ $router->mount("/api", function () use ($router) {
         function () use ($router) {
             $router->delete("/(\d+)", "BuildingController@delete");
             $router->put("/(\d+)", "BuildingController@edit");
+            $router->get("/(\d+)", "BuildingController@getId");
             $router->get("/", "BuildingController@index");
             $router->post("/", "BuildingController@add");
         }
