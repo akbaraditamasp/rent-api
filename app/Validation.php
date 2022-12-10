@@ -52,7 +52,6 @@ class Validation
                 }
             }
         } catch (NestedValidationException $e) {
-            echo json_encode(App::$request->getParsedBody());
             App::$response->getBody()->write(json_encode($e->getMessages()));
             App::$response = App::$response->withStatus(400)->withHeader("Content-Type", "application/json");
             App::finish();
