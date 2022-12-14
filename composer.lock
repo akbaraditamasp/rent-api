@@ -2238,16 +2238,16 @@
         },
         {
             "name": "robmorgan/phinx",
-            "version": "0.13.2",
+            "version": "0.13.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/cakephp/phinx.git",
-                "reference": "f18dd217d79b9e5e3531bc204f0037a50655cf78"
+                "reference": "da741d10879bcdd235a830d589ae51659f746262"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/cakephp/phinx/zipball/f18dd217d79b9e5e3531bc204f0037a50655cf78",
-                "reference": "f18dd217d79b9e5e3531bc204f0037a50655cf78",
+                "url": "https://api.github.com/repos/cakephp/phinx/zipball/da741d10879bcdd235a830d589ae51659f746262",
+                "reference": "da741d10879bcdd235a830d589ae51659f746262",
                 "shasum": ""
             },
             "require": {
@@ -2318,9 +2318,9 @@
             ],
             "support": {
                 "issues": "https://github.com/cakephp/phinx/issues",
-                "source": "https://github.com/cakephp/phinx/tree/0.13.2"
+                "source": "https://github.com/cakephp/phinx/tree/0.13.3"
             },
-            "time": "2022-11-25T21:17:52+00:00"
+            "time": "2022-12-01T16:30:23+00:00"
         },
         {
             "name": "symfony/config",

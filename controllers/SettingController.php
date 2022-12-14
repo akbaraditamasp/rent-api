@@ -2,7 +2,10 @@
 
 namespace Controller;
 
+use EndyJasmi\Cuid;
+use Laminas\Diactoros\UploadedFile;
 use Model\Setting;
+use Psr\Http\Message\UploadedFileInterface;
 use Respect\Validation\Validator as v;
 use Siluet\App;
 use Siluet\Auth;
@@ -24,16 +27,8 @@ class SettingController
     {
         Auth::validate();
         $body = Validation::validate([
-            "body" => [
-                "settings" => v::arrayType()
-                    ->each(
-                        v::arrayType()
-                            ->keySet(
-                                v::key("key", v::stringType()->notEmpty()),
-                                v::key("value", v::optional(v::anyOf(v::stringType(), v::intType(), v::json()))),
-                            )
-                    )
-            ]
+            "body" =>  v::optional(v::anyOf(v::stringType(), v::intType())),
+            "file" => v::image()
         ]);
         App::controller(function () use ($body) {
             $settings = [];
@@ -41,14 +36,41 @@ class SettingController
 
             $db->transaction(
                 function () use (&$settings, $body) {
-                    foreach ($body["settings"] as $setting) {
+                    foreach ($body as $key => $setting) {
                         /**
-                         * @var Setting
+                         * @var Setting $set
                          */
-                        $set = Setting::firstOrNew(["key" => $setting["key"]]);
-                        $set->value = $setting["value"];
-                        $set->save();
-                        $settings[] = $set->toArray();
+                        $set = Setting::firstOrNew(["key" => $key]);
+                        if (!($setting instanceof UploadedFile)) {
+                            $set->value = $setting;
+                            $set->save();
+                            $settings[] = $set->toArray();
+                        } else {
+                            /**
+                             * @var UploadedFileInterface $file
+                             */
+                            $file = $setting;
+
+                            $filename = sprintf(
+                                '%s.%s',
+                                Cuid::cuid(),
+                                pathinfo($file->getClientFilename(), PATHINFO_EXTENSION)
+                            );
+                            if ($set->value) {
+                                $deleted = $set->value;
+                            }
+                            $set->value = $filename;
+                            $set->save();
+                            $settings[] = $set->toArray();
+
+                            if ($deleted) {
+                                if (file_exists(__DIR__ . "/../uploaded/" . $deleted)) {
+                                    unlink(__DIR__ . "/../uploaded/" . $deleted);
+                                }
+                            }
+
+                            $file->moveTo(__DIR__ . "/../uploaded/" . $filename);
+                        }
                     }
                 }
             );
