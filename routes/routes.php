@@ -5,7 +5,7 @@ use Siluet\App;
 $router->mount("/api", function () use ($router) {
     $router->get("/auth/login", "AuthController@login");
     $router->get("/auth/customer/login", "AuthController@customer_login");
-    $router->get("/auth/customer/register", "AuthController@customer_registration");
+    $router->post("/auth/customer/register", "AuthController@customer_registration");
     $router->mount(
         "/setting",
         function () use ($router) {
