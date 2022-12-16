@@ -4,6 +4,7 @@ use Siluet\App;
 
 $router->mount("/api", function () use ($router) {
     $router->get("/auth/login", "AuthController@login");
+    $router->get("/auth/customer/login", "AuthController@customer_login");
     $router->mount(
         "/setting",
         function () use ($router) {
@@ -19,6 +20,15 @@ $router->mount("/api", function () use ($router) {
             $router->get("/(\d+)", "BuildingController@getId");
             $router->get("/", "BuildingController@index");
             $router->post("/", "BuildingController@add");
+        }
+    );
+    $router->mount(
+        "/booking",
+        function () use ($router) {
+            $router->get("/check/(\d+)", "BookingController@check");
+            $router->get("/(\d+)", "BookingController@get");
+            $router->post("/(\d+)", "BookingController@add");
+            $router->get("/", "BookingController@index");
         }
     );
 });

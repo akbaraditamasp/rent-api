@@ -27,6 +27,7 @@
     "medz/cors": "^1.5",
     "endyjasmi/cuid": "2.*",
     "notihnio/php-request-parser": "2.0",
-    "kekos/multipart-form-data-parser": "^1.1"
+    "kekos/multipart-form-data-parser": "^1.1",
+    "xendit/xendit-php": "^2.19"
   }
 }

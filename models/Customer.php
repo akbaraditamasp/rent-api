@@ -4,7 +4,7 @@ namespace Model;
 
 use Illuminate\Database\Eloquent\Model as BaseModel;
 
-class Building extends BaseModel
+class Customer extends BaseModel
 {
     /**
      * The attributes that are mass assignable.
@@ -12,12 +12,17 @@ class Building extends BaseModel
      * @var array<int, string>
      */
     protected $fillable = [
-        "name", "address", "facilities", "pic", "price"
+        "email",
+        "password"
     ];
 
-    protected $casts = [
-        "facilities" => "array",
-        "price" => "int"
+    /**
+     * The attributes that should be hidden for serialization.
+     *
+     * @var array<int, string>
+     */
+    protected $hidden = [
+        'password',
     ];
 
     public function bookings()
