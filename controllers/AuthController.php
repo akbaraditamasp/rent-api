@@ -63,7 +63,7 @@ class AuthController
     public function customer_registration()
     {
         ["email" => $email, "password" => $password] = Validation::validate([
-            "query" => [
+            "body" => [
                 "email" => v::stringType()->notEmpty(),
                 "password" => v::stringType()->notEmpty(),
             ]
