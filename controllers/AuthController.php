@@ -72,7 +72,7 @@ class AuthController
         App::controller(function () use ($email, $password) {
             $customer = new Customer();
             $customer->email = $email;
-            $customer->password = $password;
+            $customer->password = password_hash($password, PASSWORD_BCRYPT);
             $customer->save();
 
             return $customer->toArray() + ["token" => CustomerAuth::makeToken($customer)];
