@@ -18,7 +18,8 @@ class Booking extends BaseModel
     protected $casts = [
         "date" => "date",
         "price" => "int",
-        "detail" => "json"
+        "detail" => "json",
+        "is_paid" => "bool"
     ];
 
     public function building()
