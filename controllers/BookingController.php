@@ -103,12 +103,21 @@ class BookingController
 
     public function get($id)
     {
-        CustomerAuth::validate();
+        CustomerAuth::validate(false);
+        if (!CustomerAuth::$user) {
+            Auth::validate();
+        }
         App::controller(function () use ($id) {
             /**
              * @var Booking $booking
              */
-            $booking = CustomerAuth::$user->bookings()->with("building")->findOrFail($id);
+            $booking;
+
+            if (CustomerAuth::$user) {
+                $booking = CustomerAuth::$user->bookings()->with("building")->findOrFail($id);
+            } else {
+                $booking = Booking::with("building")->findOrFail($id);
+            }
 
             return $booking->toArray();
         });
@@ -158,6 +167,41 @@ class BookingController
             }
 
             return [];
+        });
+    }
+
+    public function callback()
+    {
+        ["merchant_name" => $merchant, "id" => $id] = Validation::validate([
+            "body" => [
+                "merchant_name" => v::optional(v::stringType()->notEmpty()),
+                "id" => v::optional(v::stringType()->notEmpty())
+            ]
+        ]);
+        App::controller(function () use ($merchant, $id) {
+            if ($merchant === "Xendit") {
+                return ["success" => "Hello xendit!"];
+            }
+
+            $token = App::$response->getHeaderLine("X-Callback-Token") ?? "";
+
+            if ($token !== $_ENV["X_CALLBACK_TOKEN"]) {
+                App::$response = App::$response->withStatus(401);
+                return ["error" => "Unauthorized"];
+            }
+
+            $getInvoice = (Xendit::get())::retrieve($id);
+
+            $booking = Booking::findOrFail($getInvoice["external_id"]);
+
+            if ($getInvoice["status"] === "SETTLED" || $getInvoice["status"] === "PAID") {
+                $booking->is_paid = true;
+                $booking->save();
+            } else if ($getInvoice["status"] === "EXPIRED") {
+                $booking->delete();
+            }
+
+            return $booking->toArray();
         });
     }
 }
