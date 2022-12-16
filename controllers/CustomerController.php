@@ -1,8 +1,10 @@
 <?php
 
-namespace Siluet;
+namespace Controller;
 
 use Model\Customer;
+use Siluet\App;
+use Siluet\Auth;
 
 class CustomerController
 {
