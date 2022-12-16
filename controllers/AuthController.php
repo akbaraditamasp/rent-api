@@ -59,4 +59,23 @@ class AuthController
             return $user->toArray() + ["token" => $token];
         });
     }
+
+    public function customer_registration()
+    {
+        ["email" => $email, "password" => $password] = Validation::validate([
+            "query" => [
+                "email" => v::stringType()->notEmpty(),
+                "password" => v::stringType()->notEmpty(),
+            ]
+        ]);
+
+        App::controller(function () use ($email, $password) {
+            $customer = new Customer();
+            $customer->email = $email;
+            $customer->password = $password;
+            $customer->save();
+
+            return $customer->toArray() + ["token" => CustomerAuth::makeToken($customer)];
+        });
+    }
 }
