@@ -32,6 +32,7 @@ $router->mount("/api", function () use ($router) {
             $router->get("/", "BookingController@index");
         }
     );
+    $router->get("/user", "CustomerController@index");
 });
 
 $router->get("/image/([^/]+)", function ($filename) {
