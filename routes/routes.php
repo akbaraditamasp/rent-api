@@ -27,6 +27,7 @@ $router->mount("/api", function () use ($router) {
         "/booking",
         function () use ($router) {
             $router->get("/check/(\d+)", "BookingController@check");
+            $router->post("/callback", "BookingController@callback");
             $router->get("/(\d+)", "BookingController@get");
             $router->post("/(\d+)", "BookingController@add");
             $router->get("/", "BookingController@index");
