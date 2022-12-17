@@ -192,7 +192,7 @@ class BookingController
 
             $getInvoice = (Xendit::get())::retrieve($id);
 
-            $booking = Booking::findOrFail($getInvoice["external_id"]);
+            $booking = Booking::where("inv", $getInvoice["external_id"])->firstOrFail();
 
             if ($getInvoice["status"] === "SETTLED" || $getInvoice["status"] === "PAID") {
                 $booking->is_paid = true;
