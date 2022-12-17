@@ -183,7 +183,7 @@ class BookingController
                 return ["success" => "Hello xendit!"];
             }
 
-            $token = App::$response->getHeaderLine("X-Callback-Token") ?? "";
+            $token = App::$request->getHeaderLine("x-callback-token") ?? "";
 
             if ($token !== $_ENV["X_CALLBACK_TOKEN"]) {
                 App::$response = App::$response->withStatus(401);
