@@ -24,7 +24,7 @@ class BuildingController
                 "price" => v::numericVal()->notEmpty()
             ],
             "file" => [
-                "pics" => [v::image()]
+                "pics" => [v::optional(v::arrayType()), v::image()]
             ]
         ]);
 
