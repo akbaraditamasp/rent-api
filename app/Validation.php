@@ -9,6 +9,32 @@ use Respect\Validation\Validator;
 
 class Validation
 {
+    private static function check_file($field, $rule, $file, &$data)
+    {
+        /**
+         * @var ?UploadedFile $uploaded
+         */
+        $uploaded = isset($file[$field]) ? $file[$field] : null;
+
+        if (Validator::objectType()->attribute("file", Validator::file())->validate($uploaded)) {
+            Validator::objectType()->attribute("file", $rule)->assert($uploaded);
+            $data[$field] = $uploaded;
+        } else if (Validator::objectType()->attribute("stream")->validate($uploaded)) {
+            $cache = sys_get_temp_dir() . "/" . Cuid::cuid();
+            stream_copy_to_stream($uploaded->getStream()->detach(), fopen($cache, "w"));
+
+            $uploadedTmp = new UploadedFile($cache, $uploaded->getSize(), $uploaded->getError(), $uploaded->getClientFilename());
+
+            $rule->assert($cache);
+
+            $data[$field] = $uploadedTmp;
+        } else {
+            $rule->assert($uploaded);
+
+            $data[$field] = $uploaded;
+        }
+    }
+
     public static function validate(array $rules)
     {
         $body = App::$request->getParsedBody();
@@ -49,27 +75,18 @@ class Validation
 
             if (is_array($rules["file"] ?? [])) {
                 foreach ($rules["file"] ?? [] as $field => $rule) {
-                    /**
-                     * @var ?UploadedFile $uploaded
-                     */
-                    $uploaded = isset($file[$field]) ? $file[$field] : null;
-
-                    if (Validator::objectType()->attribute("file", Validator::file())->validate($uploaded)) {
-                        Validator::objectType()->attribute("file", $rule)->assert($uploaded);
-                        $data[$field] = $uploaded;
-                    } else if (Validator::objectType()->attribute("stream")->validate($uploaded)) {
-                        $cache = sys_get_temp_dir() . "/" . Cuid::cuid();
-                        stream_copy_to_stream($uploaded->getStream()->detach(), fopen($cache, "w"));
-
-                        $uploadedTmp = new UploadedFile($cache, $uploaded->getSize(), $uploaded->getError(), $uploaded->getClientFilename());
-
-                        $rule->assert($cache);
-
-                        $data[$field] = $uploadedTmp;
+                    if (is_array($rule)) {
+                        $ruleTmp = $rule[0];
+                        if (count($rule) > 1) {
+                            $ruleTmp = $rule[1];
+                            $rule[0]->assert($file[$field] ?? null);
+                        }
+                        $data[$field] = [];
+                        for ($i = 0; $i < count($file[$field] ?? []); $i++) {
+                            static::check_file($i, $ruleTmp, $file[$field] ?? [], $data[$field]);
+                        }
                     } else {
-                        $rule->assert($uploaded);
-
-                        $data[$field] = $uploaded;
+                        static::check_file($field, $rule, $file, $data);
                     }
                 }
             } else {

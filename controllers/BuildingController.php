@@ -4,6 +4,7 @@ namespace Controller;
 
 use EndyJasmi\Cuid;
 use Model\Building;
+use Model\Pic;
 use Respect\Validation\Validator as v;
 use Siluet\App;
 use Siluet\Auth;
@@ -23,36 +24,50 @@ class BuildingController
                 "price" => v::numericVal()->notEmpty()
             ],
             "file" => [
-                "pic" => v::optional(v::image())
+                "pics" => [v::image()]
             ]
         ]);
+
         App::controller(function () use ($body) {
             $building = new Building();
             (Eloquent::getCapsule())->connection()->transaction(function () use ($building, $body) {
-                $file = $body["pic"];
+                $files = $body["pics"];
+                $fileData = [];
 
                 $building->name = $body["name"];
                 $building->address = $body["address"];
                 $building->facilities = $body["facilities"];
                 $building->price = $body["price"];
 
-                if ($file) {
-                    $filename = sprintf(
-                        '%s.%s',
-                        Cuid::cuid(),
-                        pathinfo($file->getClientFilename(), PATHINFO_EXTENSION)
-                    );
-                    $building->pic = $filename;
+                if (count($files)) {
+                    foreach ($files as $file) {
+                        $filename = sprintf(
+                            '%s.%s',
+                            Cuid::cuid(),
+                            pathinfo($file->getClientFilename(), PATHINFO_EXTENSION)
+                        );
+                        $fileTmp = new Pic();
+                        $fileTmp->path = $filename;
+
+                        $fileData[] = [
+                            "name" => $filename,
+                            "file" => $file,
+                            "model" => $fileTmp
+                        ];
+                    }
                 }
 
                 $building->save();
 
-                if ($file) {
-                    $file->moveTo(__DIR__ . "/../uploaded/" . $filename);
+                foreach ($fileData as $file) {
+                    $building->pics()->save($file["model"]);
+                    $file["file"]->moveTo(__DIR__ . "/../uploaded/" . $file["name"]);
                 }
             });
 
-            return $building->toArray();
+            return $building->toArray() + [
+                "pics" => $building->pics()->get()->toArray()
+            ];
         });
     }
 
@@ -138,7 +153,7 @@ class BuildingController
             $page = App::$request->getQueryParams()["page"] ?? 1;
             $offset = (((int) $page) - 1) * ((int) $limit);
 
-            $buildings = Building::orderByDesc("created_at");
+            $buildings = Building::with(["pics"])->orderByDesc("created_at");
 
             return [
                 "pageTotal" => ceil($buildings->count() / ((int) $limit)),
@@ -153,7 +168,7 @@ class BuildingController
             /**
              * @var Building $building
              */
-            $building = Building::findOrFail($id);
+            $building = Building::where("id", $id)->with(["pics"])->firstOrFail();
 
             return $building->toArray();
         });

@@ -24,4 +24,9 @@ class Building extends BaseModel
     {
         return $this->hasMany(Booking::class);
     }
+
+    public function pics()
+    {
+        return $this->hasMany(Pic::class);
+    }
 }
