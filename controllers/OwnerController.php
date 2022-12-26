@@ -46,7 +46,16 @@ class OwnerController
     {
         Auth::validate();
         App::controller(function () {
-            return User::where("is_owner", true)->withCount("buildings")->get()->toArray();
+            $limit = App::$request->getQueryParams()["limit"] ?? 5;
+            $page = App::$request->getQueryParams()["page"] ?? 1;
+            $offset = (((int) $page) - 1) * ((int) $limit);
+
+            $user = User::where("is_owner", true)->withCount("buildings");
+
+            return [
+                "pageTotal" => ceil($user->count() / ((int) $limit)),
+                "rows" => $user->skip($offset)->take($limit)->get()
+            ];
         });
     }
 }
