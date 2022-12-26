@@ -46,7 +46,7 @@ class OwnerController
     {
         Auth::validate();
         App::controller(function () {
-            return User::where("is_owner", true)->get()->toArray();
+            return User::where("is_owner", true)->withCount("buildings")->get()->toArray();
         });
     }
 }
