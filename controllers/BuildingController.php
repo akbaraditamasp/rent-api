@@ -79,49 +79,68 @@ class BuildingController
                 "name" => v::optional(v::stringType()->notEmpty()),
                 "address" => v::optional(v::stringType()->notEmpty()),
                 "facilities" => v::optional(v::arrayType()->each(v::stringType()->notEmpty())),
-                "price" => v::optional(v::numericVal()->notEmpty())
+                "price" => v::optional(v::numericVal()->notEmpty()),
+                "arrangePics" => v::optional(v::arrayType()->each(v::numericVal()))
             ],
             "file" => [
-                "pic" => v::optional(v::image())
+                "pics" => [v::optional(v::arrayType()), v::image()]
             ]
         ]);
+
         App::controller(function () use ($id, $body) {
             /**
              * @var Building $building
              */
             $building = Building::findOrFail($id);
             (Eloquent::getCapsule())->connection()->transaction(function () use ($building, $body) {
-                $file = $body["pic"];
+                $files = $body["pics"];
 
                 $building->name = $body["name"] ?? $building->name;
                 $building->address = $body["address"] ?? $building->address;
                 $building->facilities = $body["facilities"] ?? $building->facilities;
                 $building->price = $body["price"] ?? $building->price;
 
-                if ($file) {
-                    $deleteFile = $building->pic;
-                    $filename = sprintf(
-                        '%s.%s',
-                        Cuid::cuid(),
-                        pathinfo($file->getClientFilename(), PATHINFO_EXTENSION)
-                    );
-                    $building->pic = $filename;
+                if (count($files)) {
+                    foreach ($files as $file) {
+                        $filename = sprintf(
+                            '%s.%s',
+                            Cuid::cuid(),
+                            pathinfo($file->getClientFilename(), PATHINFO_EXTENSION)
+                        );
+                        $fileTmp = new Pic();
+                        $fileTmp->path = $filename;
+
+                        $fileData[] = [
+                            "name" => $filename,
+                            "file" => $file,
+                            "model" => $fileTmp
+                        ];
+                    }
                 }
 
                 $building->save();
 
-                if ($file) {
-                    $file->moveTo(__DIR__ . "/../uploaded/" . $filename);
+                $pics = $building->pics()->get();
+                if ($body["arrangePics"]) {
+                    foreach ($pics as $pic) {
+                        if (!in_array($pic->id, $body["arrangePics"])) {
+                            $pic->delete();
+                            if (file_exists(__DIR__ . "/../uploaded/" . $pic->path)) {
+                                unlink(__DIR__ . "/../uploaded/" . $pic->path);
+                            }
+                        }
+                    }
                 }
 
-                if (isset($deleteFile)) {
-                    if (file_exists(__DIR__ . "/../uploaded/$deleteFile")) {
-                        unlink(__DIR__ . "/../uploaded/$deleteFile");
-                    }
+                foreach ($fileData as $file) {
+                    $building->pics()->save($file["model"]);
+                    $file["file"]->moveTo(__DIR__ . "/../uploaded/" . $file["name"]);
                 }
             });
 
-            return $building->toArray();
+            return $building->toArray() + [
+                "pics" => $building->pics()->get()->toArray()
+            ];
         });
     }
 
@@ -135,11 +154,15 @@ class BuildingController
             $building = Building::findOrFail($id);
 
             (Eloquent::getCapsule())->getConnection()->transaction(function () use ($building) {
-                $building->delete();
-
-                if (file_exists(__DIR__ . "/../uploaded/" . $building->pic)) {
-                    unlink(__DIR__ . "/../uploaded/" . $building->pic);
+                $pics = $building->pics()->get();
+                foreach ($pics as $pic) {
+                    if (file_exists(__DIR__ . "/../uploaded/" . $pic->path)) {
+                        unlink(__DIR__ . "/../uploaded/" . $pic->path);
+                    }
+                    $pic->delete();
                 }
+
+                $building->delete();
             });
 
             return $building->toArray();
