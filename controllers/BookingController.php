@@ -128,7 +128,7 @@ class BookingController
         CustomerAuth::validate(false);
 
         if (!CustomerAuth::$user) {
-            Auth::validate();
+            Auth::validate(false, true);
         }
 
         App::controller(function () {
@@ -138,6 +138,11 @@ class BookingController
 
             if (CustomerAuth::$user) {
                 $bookings = CustomerAuth::$user->bookings()->with("building")->orderByDesc("created_at");
+            } else if (Auth::$user->is_owner) {
+                $user = Auth::$user;
+                $bookings = Booking::with(["building" => function ($query) use ($user) {
+                    return $query->where("user_id", $user->id);
+                }])->orderByDesc("created_at");
             } else {
                 $bookings = Booking::with("building")->orderByDesc("created_at");
             }
