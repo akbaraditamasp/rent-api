@@ -24,6 +24,14 @@ $router->mount("/api", function () use ($router) {
         }
     );
     $router->mount(
+        "/owner",
+        function () use ($router) {
+            $router->delete("/(\w+)", "OwnerController@delete");
+            $router->post("/", "OwnerController@add");
+            $router->get("/", "OwnerController@index");
+        }
+    );
+    $router->mount(
         "/booking",
         function () use ($router) {
             $router->get("/check/(\d+)", "BookingController@check");

@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Model\User;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
+use Symfony\Component\Config\Definition\Exception\Exception;
 
 class Auth
 {
@@ -23,7 +24,7 @@ class Auth
         return $jwt;
     }
 
-    public static function validate()
+    public static function validate($strict = true, $owner = false)
     {
         try {
             $token = App::$request->getHeaderLine("Authorization");
@@ -33,12 +34,17 @@ class Auth
             $decoded = (array) $decoded;
 
             static::$user = User::findOrFail($decoded["id"]);
+            if (static::$user->is_owner && !$owner) {
+                throw new Exception("Unauthorized");
+            }
         } catch (\Exception $e) {
-            App::$response->getBody()->write(json_encode([
-                "error" => "Unauthorized"
-            ]));
-            App::$response = App::$response->withStatus(401)->withHeader("Content-Type", "application/json");
-            App::finish();
+            if ($strict) {
+                App::$response->getBody()->write(json_encode([
+                    "error" => "Unauthorized"
+                ]));
+                App::$response = App::$response->withStatus(401)->withHeader("Content-Type", "application/json");
+                App::finish();
+            }
         }
     }
 }

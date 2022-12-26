@@ -29,4 +29,9 @@ class Building extends BaseModel
     {
         return $this->hasMany(Pic::class);
     }
+
+    public function owner()
+    {
+        return $this->belongsTo(User::class, "user_id");
+    }
 }

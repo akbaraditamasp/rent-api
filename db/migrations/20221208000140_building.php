@@ -24,6 +24,8 @@ final class Building extends AbstractMigration
             ->addColumn("price", "integer")
             ->addColumn("facilities", "json")
             ->addColumn("pic", "string")
+            ->addColumn("user_id", "integer", ["signed" => false])
+            ->addForeignKey("user_id", "users", "id", ["delete" => "SET NULL", "update" => "CASCADE"])
             ->addTimestamps()
             ->create();
     }

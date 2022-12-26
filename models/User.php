@@ -26,6 +26,11 @@ class User extends BaseModel
     ];
 
     protected $casts = [
-        'facilities' => 'array'
+        'is_owner' => 'bool',
     ];
+
+    public function buildings()
+    {
+        return $this->hasMany(Building::class, "user_id");
+    }
 }
